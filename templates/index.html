@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="title">AI Student Predictor</h1>
+
+<div class="container">
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <h2>Inputs</h2>
+
+    <div class="input-group">
+      <label>Study Hours: <span id="studyVal">5</span></label>
+      <input type="range" id="study" min="0" max="10" value="5">
+    </div>
+
+    <div class="input-group">
+      <label>Absences: <span id="absVal">5</span></label>
+      <input type="range" id="absences" min="0" max="30" value="5">
+    </div>
+
+    <div class="input-group">
+      <label>Failures: <span id="failVal">1</span></label>
+      <input type="range" id="failures" min="0" max="5" value="1">
+    </div>
+  </div>
+
+  <!-- RESULT CARD -->
+  <div class="card result-card">
+    <h2>Prediction</h2>
+    <div id="result">--</div>
+  </div>
+
+</div>
+
+<!-- GRAPH -->
+<div class="card">
+  <h2>Prediction Curve</h2>
+  <div id="graph"></div>
+</div>
+
+<!-- IMPORTANCE -->
+<div class="card">
+  <h2>Feature Importance</h2>
+  <div id="importance"></div>
+</div>
+
+<!-- CHAT -->
+<div class="card chat-card">
+  <h2>AI Mentor</h2>
+  <div id="chat-box"></div>
+  <div class="chat-input-area">
+    <input id="chat-input" placeholder="Ask about study tips..." />
+    <button id="chat-send">Send</button>
+  </div>
+</div>
+
+<!-- STYLES -->
+<style>
+body {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-family: 'Segoe UI', sans-serif;
+  color: white;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
+  color: #333;
+  padding: 20px;
+  border-radius: 15px;
+  flex: 1;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  margin-bottom: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+}
+
+.result-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+input[type=range] {
+  width: 100%;
+}
+
+#result {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+#graph, #importance {
+  height: 400px;
+}
+
+/* CHAT */
+.chat-card {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+#chat-box {
+  flex: 1;
+  overflow-y: auto;
+  background: #f4f4f4;
+  color: black;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.chat-message {
+  margin: 5px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.user {
+  background: #667eea;
+  color: white;
+  align-self: flex-end;
+}
+
+.bot {
+  background: #10b981;
+  color: white;
+  align-self: flex-start;
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 10px;
+}
+
+#chat-input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #5a67d8;
+}
+</style>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+const study = document.getElementById("study");
+const absences = document.getElementById("absences");
+const failures = document.getElementById("failures");
+
+const studyVal = document.getElementById("studyVal");
+const absVal = document.getElementById("absVal");
+const failVal = document.getElementById("failVal");
+
+function update(){
+  studyVal.innerText = study.value;
+  absVal.innerText = absences.value;
+  failVal.innerText = failures.value;
+
+  fetch('/predict',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      study:study.value,
+      absences:absences.value,
+      failures:failures.value
+    })
+  })
+  .then(res=>res.json())
+  .then(d=>{
+    document.getElementById("result").innerHTML =
+      `<span style="color:${d.color}">
+        ${d.label} (${d.prediction.toFixed(2)})
+      </span>
+      <br>Confidence: ${d.confidence}
+      <br><small>Model Confidence shows reliability</small>`;
+
+    Plotly.react("graph",[
+      {x:d.x, y:d.y, mode:"lines", line:{width:3}},
+      {x:[d.user_x], y:[d.user_y], mode:"markers", marker:{size:10}}
+    ]);
+
+    Plotly.react("importance",[{
+      x:["Study","Absences","Failures","Efficiency","Risk"],
+      y:d.contributions,
+      type:"bar"
+    }]);
+  });
+}
+
+document.querySelectorAll("input[type=range]").forEach(i=>{
+  i.addEventListener("input", update);
+});
+
+update();
+
+/* CHAT */
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+
+function addMessage(text, type){
+  const div = document.createElement("div");
+  div.classList.add("chat-message", type);
+  div.innerText = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+document.getElementById("chat-send").onclick = async ()=>{
+  const msg = chatInput.value.trim();
+  if(!msg) return;
+
+  addMessage(msg, "user");
+  chatInput.value = "";
+
+  const res = await fetch("/chat",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({message:msg})
+  });
+
+  const data = await res.json();
+  addMessage(data.reply, "bot");
+};
+</script>
+
+{% endblock %}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI App</title>
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Global Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    min-height: 100vh;
+}
+
+/* Navigation Bar */
+nav {
+    background: rgba(0,0,0,0.2);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+nav a:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Main Content Area */
+main {
+    padding: 40px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Card Container for inner content */
+.card {
+    background: #ffffff;
+    color: #333;
+    padding: 25px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+}
+
+/* Headings */
+h1, h2, h3 {
+    color: #333;
+}
+
+/* Tables (if you have history pages) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    color: #333;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #667eea;
+    color: #fff;
+}
+
+/* Links inside content */
+a.content-link {
+    color: #667eea;
+    text-decoration: none;
+}
+
+a.content-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media(max-width: 600px){
+    nav {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav>
+    <a href="/">Home</a>
+    <a href="/history">History</a>
+    <a href="/logout">Logout</a>
+</nav>
+
+<!-- Main Content -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>
