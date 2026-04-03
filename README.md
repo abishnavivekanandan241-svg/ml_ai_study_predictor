@@ -70,11 +70,7 @@ Go to: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ---
 
-## 📸 Screenshots (Add This!)
 
-*Add screenshots of your UI here to make your project stand out*
-
----
 
 ## 🔐 Notes
 
